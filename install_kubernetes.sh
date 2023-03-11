@@ -1,3 +1,5 @@
+
+
 sudo apt-get remove docker docker-engine docker.io containerd runc
 sudo apt-get update -y
 sudo apt-get install ca-certificates curl gnupg lsb-release -y
@@ -12,7 +14,10 @@ sudo docker run hello-world
 
 sudo git clone https://github.com/Mirantis/cri-dockerd.git
 sudo wget https://go.dev/dl/go1.20.2.linux-amd64.tar.gz
-#sudo rm -rf /usr/local/go
+
+## optional
+## sudo rm -rf /usr/local/go
+
 sudo tar -C /usr/local -xzf go1.20.2.linux-amd64.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin' >>~/.profile
 source ~/.profile
