@@ -1,3 +1,3 @@
-# Preparing to be DevOps
-- This is step to install docker + kubernetes on Linux Ubuntu
-- Tested on Ubuntu in Google Cloud Platform
+# Kubernetes + MicroK8s
+Preparing to install microservices Kubernetes to build containerization on your Cloud VM like a pods.
+Tested on Ubuntu in Google Cloud Platform
