@@ -1,0 +1,44 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: nginx-rc
+  labels:
+    desc: nginx-rc
+  annotations:
+    team: nginx replication controller
+spec:
+  replicas: 3
+  selector:
+    app: nginx-rc
+  template:
+    metadata:
+      name: nginx
+      labels:
+        app: nginx-rc
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            failureThreshold: 5
+            successThreshold: 3
+            timeoutSeconds: 1
+
+
+
+
+        
+    

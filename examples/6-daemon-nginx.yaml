@@ -1,0 +1,34 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: daemon-nginx
+  labels:
+    desc: daemon-nginx
+  annotations:
+    desc: daemon nginx
+spec:
+  selector:
+    matchLabels:
+      name: daemon-nginx
+  template:
+    metadata:
+      name: daemon-nginx
+      labels:
+        name: daemon-nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            timeoutSeconds: 3
+            successThreshold: 3
+            failureThreshold: 5

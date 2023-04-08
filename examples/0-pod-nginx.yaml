@@ -1,0 +1,16 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-only
+spec:
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  containers:
+    - name: nginx
+      image: nginx 
+      ports:
+        - containerPort: 80

@@ -1,0 +1,26 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-annotation
+  labels:
+    label-key1: hilmi-user
+    label-key2: hilmi-pass
+    description: deskripsi-untuk-label
+  annotations:
+    annotation-key1: username-password-bebas
+    annotation-key2: username password bebas
+    description: deskripsi untuk annotation
+spec:
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  containers:
+    - name: nginx
+      image: nginx 
+      ports:
+        - containerPort: 80
+
+
