@@ -1,0 +1,27 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nodejs-cronjob
+  labels:
+    desc: nodejs-cronjob
+  annotations:
+    desc: nodejs-cronjob
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: nodejs-cronjob
+          labels:
+            desc: nodejs-cronjob
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: nodejs-cronjob
+              image: xhilmi/nodejs-job
+              ports:
+                - containerPort: 80
+

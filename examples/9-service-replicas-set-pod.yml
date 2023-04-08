@@ -1,0 +1,85 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+  labels: 
+    desc: nginx-rs
+  annotations:
+    desc: nginx-rs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      name: nginx
+      labels:
+        app: nginx
+    spec: 
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      nodeSelector:
+        node: master-node
+        # node: cluster-node-a
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+  labels:
+    desc: nginx-svc
+  annotations:
+    desc: nginx-svc
+spec:
+  selector:
+    app: nginx
+  ports:
+    - port: 8080
+      targetPort: 80
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: curl-pod
+  labels:
+    desc: curl-pod
+  annotations:
+    desc: curl-pod
+spec:
+  nodeSelector:
+    node: master-node
+    # node: cluster-node-b
+  tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+  containers:
+    - name: curl-pod
+      image: xhilmi/curl-pod
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,52 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs-node-selector
+  labels:
+    desc: nginx-rs-node-selector
+  annotations:
+    desc: nginx-rs-node-selector
+spec:
+  replicas: 3
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - nginx-rs-node-selector
+      - key: dept
+        operator: In
+        values:
+          - finance
+          - sysadmin
+          - devops
+  template:
+    metadata:
+      name: nginx-rs-node-selector
+      labels:
+        app: nginx-rs-node-selector
+        dept: devops
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      restartPolicy: Always
+      nodeSelector:
+        node: cluster-node-a
+      containers:
+        - name: nginx-rs-node-selector
+          image: nginx
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 2
+            failureThreshold: 5

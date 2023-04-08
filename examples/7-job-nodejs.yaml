@@ -1,0 +1,28 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nodejs-job
+  labels:
+    desc: nodejs-job
+  annotations:
+    desc: nodejs-job
+spec:
+  completions: 6
+  parallelism: 3
+  # selector:
+  #   matchLabels:
+  #     desc: nodejs-job
+  template:
+    metadata:
+      name: nodejs-job
+      labels:
+        desc: nodejs-job
+    spec: 
+      restartPolicy: Never
+      containers:
+        - name: nodejs-job
+          image: xhilmi/nodejs-job
+          ports:
+            - containerPort: 80
