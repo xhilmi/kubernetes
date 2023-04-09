@@ -1,0 +1,36 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-domain
+  labels: 
+    desc: svc-domain
+  annotations:
+    desc: svc-domain
+spec: 
+  type: ExternalName
+  externalName: example.com
+  ports:
+    - port: 80
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: curl-pod
+  labels:
+    name: curl-pod
+  annotations:
+    name: curl-pod
+spec:
+  nodeSelector:
+    node: master-node
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  containers:
+    - name: curl-pod
+      image: xhilmi/curl-pod
+      ports: 
+        - containerPort: 80
