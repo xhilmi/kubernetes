@@ -1,12 +1,13 @@
+# xhilmi : https://s.id/hilmi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: svc-domain
+  name: domain-svc
   labels: 
-    desc: svc-domain
+    desc: domain-svc
   annotations:
-    desc: svc-domain
+    desc: domain-svc
 spec: 
   type: ExternalName
   externalName: example.com
@@ -32,5 +33,5 @@ spec:
   containers:
     - name: curl-pod
       image: xhilmi/curl-pod
-      ports: 
-        - containerPort: 80
+      # ports: 
+      #   - containerPort: 80
