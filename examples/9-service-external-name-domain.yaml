@@ -18,11 +18,11 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: curl-pod
+  name: nginx-curl
   labels:
-    name: curl-pod
+    name: nginx-curl
   annotations:
-    name: curl-pod
+    name: nginx-curl
 spec:
   nodeSelector:
     node: master-node
@@ -31,7 +31,7 @@ spec:
       operator: Exists
       effect: NoSchedule
   containers:
-    - name: curl-pod
-      image: xhilmi/curl-pod
+    - name: nginx-curl
+      image: xhilmi/nginx-curl
       # ports: 
       #   - containerPort: 80
