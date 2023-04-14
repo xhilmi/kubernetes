@@ -1,0 +1,25 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-nodejs
+  labels:
+    name: volume-nodejs
+spec:
+  volumes:
+    - name: nodejs
+      emptyDir: {}
+  restartPolicy: Always
+  nodeSelector:
+    node: master-node
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  containers:
+    - name: nodejs
+      image: xhilmi/nodejs-writer
+      volumeMounts:
+        - name: nodejs
+          mountPath: /app/html
