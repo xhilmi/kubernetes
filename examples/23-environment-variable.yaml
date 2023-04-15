@@ -1,0 +1,29 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: env-var
+  labels:
+    name: env-var
+spec:
+  volumes:
+    - name: volume-nodejs
+      emptyDir: {}
+  nodeSelector:
+    node: master-node
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  containers:
+    - name: nodejs
+      image: xhilmi/nodejs-writer
+      volumeMounts:
+        - name: volume-nodejs
+          mountPath: /app/env
+      env:
+        - name: HTML_LOCATION
+          value: /app/env 
+        # - name:
+        #   value:
