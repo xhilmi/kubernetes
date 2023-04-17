@@ -3,9 +3,9 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nodejs-writer-persistent-volume
+  name: nodejs-pv
   labels:
-    name: nodejs-writer-persistent-volume
+    name: nodejs-pv
 spec:
   accessModes:
     - ReadWriteOnce
@@ -18,9 +18,9 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nodejs-writer-persistent-volume-claim
+  name: nodejs-pvc
   labels:
-    name: nodejs-writer-persistent-volume-claim
+    name: nodejs-pvc
 spec:
   accessModes:
     - ReadWriteOnce
@@ -33,9 +33,9 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nodejs-writer-deployment
+  name: nodejs-deploy
   labels:
-    name: nodejs-writer-deployment
+    name: nodejs-deploy
 spec:
   revisionHistoryLimit: 5
   replicas: 1
@@ -44,17 +44,13 @@ spec:
       - key: app
         operator: In 
         values:
-          - nodejs-writer
+          - nodejs
   template:
     metadata:
-      name: nodejs-writer
+      name: nodejs
       labels:
-        app: nodejs-writer
+        app: nodejs
     spec:
-      volumes:
-      - name: nodejs-writer-volume
-        persistentVolumeClaim:
-          claimName: nodejs-writer-persistent-volume-claim
       nodeSelector:
         node: master-node
       tolerations:
@@ -62,12 +58,18 @@ spec:
           operator: Exists
           effect: NoSchedule
       restartPolicy: Always
+      volumes:
+        - name: nodejs-volume
+          persistentVolumeClaim:
+            claimName: nodejs-pvc
       containers: 
-        - name: nodejs-writer
+        - name: nodejs
           image: xhilmi/nodejs-writer:latest
           volumeMounts:
-            - name: nodejs-writer-volume
+            - name: nodejs-volume
               mountPath: /app/html
+
+
 
 
 

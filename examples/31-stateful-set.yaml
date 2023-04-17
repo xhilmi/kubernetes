@@ -1,0 +1,65 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nodejs-pv
+  labels:
+    name: nodejs-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 5Gi
+  hostPath:
+    path: /data/location
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nodejs-sts
+  labels:
+    name: nodejs-sts
+spec:
+  replicas: 3
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - nodejs-app
+  volumeClaimTemplates:
+    - metadata:
+        name: nodejs-pvc
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        volumeMode: Filesystem
+        resources:
+          requests:
+            storage: 1Gi
+  template:
+    metadata:
+      name: nodejs-app
+      labels:
+        app: nodejs-app
+    spec:
+      # nodeSelector:
+      #   node: master-node
+      # tolerations:
+      #   - key: node-role.kubernetes.io/control-plane
+      #     operator: Exists
+      #     effect: NoSchedule
+      # restartPolicy: Always
+      containers: 
+        - name: nodejs-app
+          image: xhilmi/nodejs-stateful:latest
+          env: 
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: nodejs-pvc
+              mountPath: /app/data
