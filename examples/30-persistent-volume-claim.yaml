@@ -1,0 +1,73 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nodejs-writer-persistent-volume
+  labels:
+    name: nodejs-writer-persistent-volume
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 5Gi
+  hostPath:
+    path: /data/location
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nodejs-writer-persistent-volume-claim
+  labels:
+    name: nodejs-writer-persistent-volume-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-writer-deployment
+  labels:
+    name: nodejs-writer-deployment
+spec:
+  revisionHistoryLimit: 5
+  replicas: 1
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In 
+        values:
+          - nodejs-writer
+  template:
+    metadata:
+      name: nodejs-writer
+      labels:
+        app: nodejs-writer
+    spec:
+      volumes:
+      - name: nodejs-writer-volume
+        persistentVolumeClaim:
+          claimName: nodejs-writer-persistent-volume-claim
+      nodeSelector:
+        node: master-node
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      restartPolicy: Always
+      containers: 
+        - name: nodejs-writer
+          image: xhilmi/nodejs-writer:latest
+          volumeMounts:
+            - name: nodejs-writer-volume
+              mountPath: /app/html
+
+
+

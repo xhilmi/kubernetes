@@ -1,0 +1,51 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-nodejs-web
+  labels:
+    name: deployment-nodejs-web
+spec:
+  revisionHistoryLimit: 10
+  replicas: 3
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - nodejs-web
+  template:
+    metadata:
+      name: nodejs-template-web
+      labels:
+        app: nodejs-web
+    spec:
+      restartPolicy: Always
+      nodeSelector:
+        node: master-node
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists 
+          effect: NoSchedule
+      containers:
+        - name: nodejs-web
+          image: xhilmi/nodejs-web:v1
+          ports:
+            - containerPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-nodejs-web
+  labels:
+    name: service-nodejs-web
+spec:
+  type: NodePort
+  selector:
+    name: service-nodejs-web
+  ports: 
+    - port: 3030
+      targetPort: 3000
+      nodePort: 30001
