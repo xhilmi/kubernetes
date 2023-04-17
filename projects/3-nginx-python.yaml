@@ -1,0 +1,27 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-python-deployment
+  labels:
+    name: nginx-python-deployment
+spec:
+  replicas: 2
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - nginx-python
+  template:
+    metadata:
+      name: nginx-python
+      labels:
+        app: nginx-python
+    spec:
+      containers:
+        - name: nginx-python
+          image: xhilmi/nginx-python:latest
+          imagePullPolicy: Always
+      imagePullSecrets:
+      - name: regcred

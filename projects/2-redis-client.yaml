@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis-client
+  labels:
+    name: redis-client
+  annotations:
+    name: redis-client
+spec:
+  containers:
+    - name: redis-client
+      image: docker.io/bitnami/redis:6.2.7-debian-11-r11
+      env:
+        - name: REDIS_PASS
+          value: 4JI0vuskoz7GHtMQ
+      command:
+      - sleep
+      - infinity
+      imagePullPolicy: Always
+  restartPolicy: Never
+
+  # kubectl run redis-client --image=docker.io/bitnami/redis:6.2.7-debian-11-r11 --env="REDIS_PASS=4JI0vuskoz7GHtMQ" --restart=Never --command -- sleep infinity

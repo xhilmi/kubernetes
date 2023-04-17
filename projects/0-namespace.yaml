@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hilmi-space
+  labels:
+    name: hilmi-space
+
+# kubectl create ns hilmi-space
