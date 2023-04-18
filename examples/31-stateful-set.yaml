@@ -3,9 +3,9 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nodejs-pv
+  name: nodejs-stateful-volume
   labels:
-    name: nodejs-pv
+    name: nodejs-stateful-volume
 spec:
   accessModes:
     - ReadWriteOnce
@@ -18,20 +18,21 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: nodejs-sts
+  name: nodejs-stateful
   labels:
-    name: nodejs-sts
+    app: nodejs-stateful
 spec:
+  serviceName: nodejs-stateful-service
   replicas: 3
   selector:
     matchExpressions:
-      - key: app
+      - key: name
         operator: In
         values:
-          - nodejs-app
+          - nodejs-stateful
   volumeClaimTemplates:
     - metadata:
-        name: nodejs-pvc
+        name: nodejs-stateful-volume-claim
       spec:
         accessModes:
           - ReadWriteOnce
@@ -39,21 +40,24 @@ spec:
         resources:
           requests:
             storage: 1Gi
+        # dataSource:
+        #   name: nodejs-pv
+        #   kind: PersistentVolume
   template:
     metadata:
-      name: nodejs-app
+      name: nodejs-stateful
       labels:
-        app: nodejs-app
+        name: nodejs-stateful
     spec:
-      # nodeSelector:
-      #   node: master-node
-      # tolerations:
-      #   - key: node-role.kubernetes.io/control-plane
-      #     operator: Exists
-      #     effect: NoSchedule
-      # restartPolicy: Always
+      nodeSelector:
+        node: master-node
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      restartPolicy: Always
       containers: 
-        - name: nodejs-app
+        - name: nodejs-stateful
           image: xhilmi/nodejs-stateful:latest
           env: 
             - name: POD_NAME
@@ -61,5 +65,20 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
           volumeMounts:
-            - name: nodejs-pvc
+            - name: nodejs-stateful-volume-claim
               mountPath: /app/data
+
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: nodejs-svc
+#   labels:
+#     name: nodejs-svc
+# spec:
+#   ports:
+#     - port: 3030
+#       targetPort: 3000
+#   type: ClusterIP
+#   selector: 
+#     name: nodejs-svc

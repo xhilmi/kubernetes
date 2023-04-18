@@ -1,0 +1,72 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  nodejs-deployment
+  labels:
+    name:  nodejs-deployment
+spec:
+  revisionHistoryLimit: 15
+  replicas: 3
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - nodejs-template
+  template:
+    metadata:
+      name: nodejs-template
+      labels:
+        app: nodejs-template
+    spec:
+      containers:
+      - name:  nodejs-web
+        image:  xhilmi/nodejs-web:latest
+        ports:
+          - containerPort: 3000
+        resources:
+          requests:
+            cpu: 200m #millicore
+            memory: 200Mi #mebibyte
+          limits:
+            cpu: 250m
+            memory: 250Mi
+        # livenessProbe:
+        #   httpGet:
+        #     path: /_status/healthz
+        #     port: 3000
+        #   initialDelaySeconds: 5
+        #   timeoutSeconds: 10
+        #   periodSeconds: 3
+        #   successThreshold: 1
+        #   failureThreshold: 4
+        # readinessProbe:
+        #   httpGet:
+        #     path: /_status/healthz
+        #     port: 3000
+        #   initialDelaySeconds: 5
+        #   timeoutSeconds: 10
+        #   periodSeconds: 3
+        #   successThreshold: 2
+        #   failureThreshold: 4
+      restartPolicy: Always
+      # imagePullPolicy: Always
+
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodejs-web-service
+  labels:
+    name: nodejs-web-service
+spec:
+  type: NodePort
+  selector:
+    name: nodejs-web-service
+  ports: 
+    - port: 3030
+      targetPort: 3000
+      nodePort: 30001

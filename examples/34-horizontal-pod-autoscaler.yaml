@@ -1,0 +1,78 @@
+# xhilmi : https://s.id/hilmi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  nodejs-deployment
+  labels:
+    name:  nodejs-deployment
+spec:
+  revisionHistoryLimit: 15
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - nodejs-template
+  template:
+    metadata:
+      name: nodejs-template
+      labels:
+        app: nodejs-template
+    spec:
+      nodeSelector:
+        node: master-node
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+      - name:  nodejs-web
+        image:  xhilmi/nodejs-web:latest
+        ports:
+          - containerPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodejs-web-service
+  labels:
+    name: nodejs-web-service
+spec:
+  # type: NodePort
+  type: LoadBalancer
+  selector:
+    name: nodejs-web
+  ports: 
+    - port: 3030
+      targetPort: 3000
+      # nodePort: 30001
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nodejs-hpa
+  labels:
+    name: nodejs-hpa
+spec:
+  minReplicas: 2
+  maxReplicas: 6
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nodejs-deployment
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 1 #in %percent
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 1 #in %percent
