@@ -21,11 +21,13 @@ echo -e "${YELLOW}# https://computingforgeeks.com/install-mirantis-cri-dockerd-a
 function menu {
     echo -e "\n"
     echo -e "${GREEN}Choose:${BOLD}"
-    echo "1) Master Node"
-    echo "2) Cluster Node"
-    echo "3) Reset Node"
-    echo "4) Exit"
-    echo -n "Enter your choice (1-4): "
+    echo "1) K8s Install on Master Node"
+    echo "2) K8s Install on Cluster Node"
+    echo "3) K8s Kubeadm Init Node"
+    echo "4) K8s Kubeadm Join Node"
+    echo "5) K8s Kubeadm Reset Node"
+    echo "6) Exit"
+    echo -n "Enter your choice (1-6): "
 }
 
 function common_install {
@@ -212,7 +214,8 @@ function common_install {
     sudo service ufw stop
 }
 
-function master_node {
+# function (1)
+function master_install {
     common_install
 
     echo -e "\n"
@@ -224,12 +227,6 @@ function master_node {
 
     echo -e "\n"
     echo -e "${YELLOW}# Run kubeadm init command...${BOLD}"
-    # sudo kubeadm init \
-    #  --pod-network-cidr=10.244.0.0/16 \
-    #  --cri-socket unix:///run/cri-dockerd.sock  \
-    #  --upload-certs \
-    #  --control-plane-endpoint=$internalip
-    #!/bin/bash
     while [[ -z $internalip ]]; do
       read -p "Enter the internal IP address of the master node (e.g. 10.184.0.8): " internalip
     done
@@ -265,12 +262,13 @@ function master_node {
     cd
     kubeadm token create --print-join-command > k8s-token.txt
     cat k8s-token.txt
-    
+
     echo -e "\n"
     echo -e "${GREEN}##### Successfull Print Token #####${BOLD}"
 }
 
-function cluster_node {
+# function (2)
+function cluster_install {
     common_install
 
     echo -e "\n"
@@ -304,32 +302,128 @@ function cluster_node {
     echo -e "${GREEN}##### Successfull Join Into Master Node #####${BOLD}"
 }
 
-function reset_node {
+# function (3)
+function kubeadm_init {
+
     echo -e "\n"
-    echo -e "${BLUE}##### Only Run When Wanna Reset Node #####${BOLD}"
+    echo -e "${BLUE}##### Run Only On Master Node #####${BOLD}"
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Pulling default images...${BOLD}"
+    sudo kubeadm config images pull --cri-socket unix:///run/cri-dockerd.sock
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Run kubeadm init command...${BOLD}"
+    while [[ -z $internalip ]]; do
+      read -p "Enter the internal IP address of the master node (e.g. 10.184.0.8): " internalip
+    done
+    read -p "Enter the pod network CIDR (e.g. 10.244.0.0/16): " podip
+    if [ -z "$podip" ]; then
+      podip="10.244.0.0/16"
+    fi
+    echo -e "\n"
+    echo -e "${YELLOW}# Run kubeadm init command...${BOLD}"
+    sudo kubeadm init \
+      --pod-network-cidr="$podip" \
+      --cri-socket unix:///run/cri-dockerd.sock \
+      --upload-certs \
+      --control-plane-endpoint="$internalip"
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Setting kube config...${BOLD}"
+    mkdir -p $HOME/.kube
+    sudo cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Setting networking using CNI Flannel...${BOLD}"
+    kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Getting cluster-info and nodes...${BOLD}"
+    kubectl cluster-info
+    kubectl get nodes
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Print kubernetes token...${BOLD}"
+    cd
+    kubeadm token create --print-join-command > k8s-token.txt
+    cat k8s-token.txt
+
+    echo -e "\n"
+    echo -e "${GREEN}##### Successfull Print Token #####${BOLD}"
+}
+
+# function (4)
+function kubeadm_join {
+    echo -e "\n"
+    echo -e "${BLUE}##### Run Only On Cluster Node #####${BOLD}"
+    while true; do
+      read -p "Enter the internal IP address of the cluster node: " internalip
+      if [ -z "$internalip" ]; then
+          echo "Please enter a valid internal IP address."
+          continue
+      fi
+      read -p "Enter the token: " token
+      if [ -z "$token" ]; then
+          echo "Please enter a valid token."
+          continue
+      fi
+      read -p "Enter the discovery-token-ca-cert-hash: " shatoken
+      if [ -z "$shatoken" ]; then
+          echo "Please enter a valid discovery-token-ca-cert-hash."
+          continue
+      fi
+      break
+    done
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Run kubeadm join command...${BOLD}"
+    sudo kubeadm join $internalip:6443 --token $token \
+        --discovery-token-ca-cert-hash sha256:$shatoken \
+        --cri-socket unix:///run/cri-dockerd.sock
+    
+    echo -e "\n"
+    echo -e "${GREEN}##### Successfull Join Into Master Node #####${BOLD}"
+}
+
+# function (5)
+function kubeadm_reset {
+    echo -e "\n"
+    echo -e "${BLUE}##### Only Run To Reset Node #####${BOLD}"
 
     echo -e "\n"
     echo -e "${YELLOW}# Run kubeadm reset command...${BOLD}"
     sudo kubeadm reset --cri-socket=unix:///var/run/cri-dockerd.sock && sudo rm -rf /etc/cni/net.d && sudo rm -f $HOME/.kube/config
 }
 
+
+
 while true; do
     menu
     read choice
     case $choice in
         1)
-            master_node
+            master_install
             break
             ;;
         2)
-            cluster_node
+            cluster_install
             break
             ;;
         3)
-            reset_node
+            kubeadm_init
             break
             ;;
         4)
+            kubeadm_join
+            break
+            ;;
+        5)
+            kubeadm_reset
+            break
+            ;;
+        6)
             echo "Exiting..."
             exit 0
             ;;
