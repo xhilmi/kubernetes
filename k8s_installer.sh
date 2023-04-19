@@ -55,7 +55,7 @@ function common_install {
     echo -e "\n"
     echo -e "${YELLOW}# Installing required packages...${BOLD}"
     sudo apt install curl apt-transport-https -y
-    curl -fsSL  https://packages.cloud.google.com/apt/doc/apt-key.gpg|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/k8s.gpg
+    curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --batch --yes --trust-model always --dearmor -o /etc/apt/trusted.gpg.d/k8s.gpg
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
     echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
     
@@ -190,12 +190,22 @@ function master_node {
 
     echo -e "\n"
     echo -e "${YELLOW}# Run kubeadm init command...${BOLD}"
+    # sudo kubeadm init \
+    #  --pod-network-cidr=10.244.0.0/16 \
+    #  --cri-socket unix:///run/cri-dockerd.sock  \
+    #  --upload-certs \
+    #  --control-plane-endpoint=$internalip
+    read -p "Enter the pod network CIDR (e.g. 10.244.0.0/16): " podip
+    if [ -z "$podip" ]; then
+      podip="10.244.0.0/16"
+    fi
     sudo kubeadm init \
-      --pod-network-cidr=10.244.0.0/16 \
-      --cri-socket unix:///run/cri-dockerd.sock  \
+      --pod-network-cidr="$podip" \
+      --cri-socket unix:///run/cri-dockerd.sock \
       --upload-certs \
-      --control-plane-endpoint=$internalip
-    
+      --control-plane-endpoint="$internalip"
+
+
     echo -e "\n"
     echo -e "${YELLOW}# Setting kube config...${BOLD}"
     mkdir -p $HOME/.kube
