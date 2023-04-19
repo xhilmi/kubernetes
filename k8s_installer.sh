@@ -1,6 +1,6 @@
 #!/bin/bash
 # (c) 2023 Hilmi
-# Color
+# Setup Color
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
