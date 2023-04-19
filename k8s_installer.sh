@@ -54,7 +54,6 @@ function common_install {
             [Nn]* ) break;;
         esac
     done
-    exec bash
 
     echo -e "\n"
     echo -e "${BLUE}##### Installing Kubernetes #####${BOLD}"
