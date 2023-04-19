@@ -77,25 +77,34 @@ function common_install {
     free -h
     sudo modprobe overlay
     sudo modprobe br_netfilter
-    sudo tee /etc/modules-load.d/k8s.conf <<EOF
-    overlay
-    br_netfilter
-    EOF
-    sudo tee /etc/sysctl.d/kubernetes.conf<<EOF
-    net.bridge.bridge-nf-call-ip6tables = 1
-    net.bridge.bridge-nf-call-iptables = 1
-    net.ipv4.ip_forward = 1
-    EOF
-    sudo tee /etc/docker/daemon.json <<EOF
-    {
-      "exec-opts": ["native.cgroupdriver=systemd"],
-      "log-driver": "json-file",
-      "log-opts": {
-        "max-size": "100m"
-      },
-      "storage-driver": "overlay2"
-    }
-    EOF
+
+    # sudo tee /etc/modules-load.d/k8s.conf<<EOF
+    # overlay
+    # br_netfilter
+    # EOF
+    
+    # sudo tee /etc/sysctl.d/kubernetes.conf<<EOF
+    # net.bridge.bridge-nf-call-ip6tables = 1
+    # net.bridge.bridge-nf-call-iptables = 1
+    # net.ipv4.ip_forward = 1
+    # EOF
+    
+
+    # sudo tee /etc/docker/daemon.json <<EOF
+    # {
+    #   "exec-opts": ["native.cgroupdriver=systemd"],
+    #   "log-driver": "json-file",
+    #   "log-opts": {
+    #     "max-size": "100m"
+    #   },
+    #   "storage-driver": "overlay2"
+    # }
+    # EOF
+    
+    echo -e "overlay\nbr_netfilter" | sudo tee -a /etc/modules-load.d/k8s.conf
+    echo -e "net.bridge.bridge-nf-call-ip6tables = 1\nnet.bridge.bridge-nf-call-iptables = 1\nnet.ipv4.ip_forward = 1" | sudo tee /etc/sysctl.d/kubernetes.conf
+    echo -e '{\n  "exec-opts": ["native.cgroupdriver=systemd"],\n  "log-driver": "json-file",\n  "log-opts": {\n    "max-size": "100m"\n  },\n  "storage-driver": "overlay2"\n}' | sudo tee /etc/docker/daemon.json
+
     sudo sysctl --system
 
     echo -e "\n"
@@ -257,6 +266,3 @@ while true; do
             ;;
     esac
 done
-   
-
-
