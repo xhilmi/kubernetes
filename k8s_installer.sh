@@ -1,6 +1,6 @@
 #!/bin/bash
 # (c) 2023 Hilmi
-# Setup Color
+# Color
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -14,7 +14,6 @@ ITALIC='\033[3m'
 # Clearing prompt after running this script.
 echo -e "\n"
 echo -e "${BLUE}##### Tools Install Kubernetes and CRI Docker #####${BOLD}"
-echo -e "\n"
 echo -e "${YELLOW}# Reference:${BOLD}"
 echo -e "${YELLOW}# https://computingforgeeks.com/install-kubernetes-cluster-ubuntu-jammy${BOLD}"
 echo -e "${YELLOW}# https://computingforgeeks.com/install-mirantis-cri-dockerd-as-docker-engine-shim-for-kubernetes${BOLD}"
@@ -263,8 +262,10 @@ function master_node {
 
     echo -e "\n"
     echo -e "${YELLOW}# Print kubernetes token...${BOLD}"
-    kubeadm token create --print-join-command >> k8s-token.txt
-
+    cd
+    kubeadm token create --print-join-command > k8s-token.txt
+    cat k8s-token.txt
+    
     echo -e "\n"
     echo -e "${GREEN}##### Successfull Print Token #####${BOLD}"
 }
