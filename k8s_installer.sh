@@ -154,7 +154,7 @@ function common_install {
     cd cri-dockerd
     mkdir bin
     sudo chmod 777 bin
-    go build -x -o bin/cri-dockerd
+    go build -o bin/cri-dockerd
     sudo mkdir -p /usr/local/bin
     sudo install -o root -g root -m 0755 bin/cri-dockerd /usr/local/bin/cri-dockerd
     sudo cp -a packaging/systemd/* /etc/systemd/system
