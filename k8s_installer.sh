@@ -129,7 +129,6 @@ function common_install {
     sudo systemctl daemon-reload 
     sudo systemctl restart docker
     sudo systemctl enable docker
-    sudo systemctl status docker
 
     echo -e "\n"
     echo -e "${YELLOW}# Updating packages...${BOLD}"
@@ -166,7 +165,6 @@ function common_install {
     sudo systemctl daemon-reload
     sudo systemctl enable cri-docker.service
     sudo systemctl enable --now cri-docker.socket
-    sudo systemctl status cri-docker.socket
 
     echo -e "\n"  
     echo -e "${YELLOW}# Checking kernel modules...${BOLD}"
@@ -217,7 +215,7 @@ function master_node {
 
 function cluster_node {
     common_install
-    
+
     echo -e "\n"
     echo -e "${PURPLE}##### Only on cluster node #####${BOLD}"
     read -p "Enter the internal IP address of the cluster node: " internalip
