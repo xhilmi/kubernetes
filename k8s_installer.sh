@@ -13,7 +13,7 @@ ITALIC='\033[3m'
 
 # Clearing prompt after running this script.
 echo -e "\n"
-echo -e "${PURPLE}##### Tools Install Kubernetes and CRI Docker #####${BOLD}"
+echo -e "${BLUE}##### Tools Install Kubernetes and CRI Docker #####${BOLD}"
 echo -e "\n"
 echo -e "${YELLOW}# Reference:${BOLD}"
 echo -e "${YELLOW}# https://computingforgeeks.com/install-kubernetes-cluster-ubuntu-jammy${BOLD}"
@@ -31,22 +31,33 @@ function menu {
 
 function common_install {
     echo -e "\n"
-    echo -e "${YELLOW}# Common steps for master node and cluster node${BOLD}"
+    echo -e "${BLUE}##### Common steps for master node and cluster node #####${BOLD}"
     
     # ... All the common steps for master and cluster node
     while true; do
         read -p "Enter the hostname of this node: " hostnamectl
+        if [ -z "$hostnamectl" ]; then
+            echo "Please enter a valid hostname."
+            continue
+        fi
         echo "Hostname: $hostnamectl"
         read -p "Is this correct? (y/n) " yn
         case $yn in
-            [Yy]* ) 
+            [Yy]* )
                 sudo sh -c "echo \"$internalip $hostnamectl\" >> /etc/hosts"
                 break;;
             [Nn]* ) ;;
             * ) echo "Please answer yes or no.";;
         esac
-        echo "Please answer yes or no to add again?"
+        read -p "Do you want to add another hostname? (y/n) " yn
+        case $yn in
+            [Nn]* ) break;;
+        esac
     done
+    exec bash
+
+    echo -e "\n"
+    echo -e "${BLUE}##### Installing Kubernetes #####${BOLD}"
 
     echo -e "\n"
     echo -e "${YELLOW}# Updating packages...${BOLD}"
@@ -55,6 +66,9 @@ function common_install {
     echo -e "\n"
     echo -e "${YELLOW}# Installing required packages...${BOLD}"
     sudo apt install curl apt-transport-https -y
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Adding kubernetes required packages...${BOLD}"
     curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --batch --yes --trust-model always --dearmor -o /etc/apt/trusted.gpg.d/k8s.gpg
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
     echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
@@ -66,28 +80,34 @@ function common_install {
     echo -e "\n"
     echo -e "${YELLOW}# Installing kubelet, kubeadm, and kubectl...${BOLD}"
     sudo apt install wget curl vim git kubelet kubeadm kubectl -y
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Marking hold to prevent upgrade automatically on kubelet, kubeadm, and kubectl...${BOLD}"
     sudo apt-mark hold kubelet kubeadm kubectl
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Checking kubectl and kubeadm version...${BOLD}"
     kubectl version --client && kubeadm version
 
     echo -e "\n"
-    echo -e "${YELLOW}# Disabling swap, setup kernel modules, and reload sysctl..${BOLD}"
+    echo -e "${YELLOW}# Disabling swap, setup kernel modules..${BOLD}"
     sudo swapoff -a 
     free -h
     sudo modprobe overlay
     sudo modprobe br_netfilter
-
+    echo -e "overlay\nbr_netfilter" | sudo tee -a /etc/modules-load.d/k8s.conf
+    #
     # sudo tee /etc/modules-load.d/k8s.conf<<EOF
     # overlay
     # br_netfilter
     # EOF
-    
+    #
     # sudo tee /etc/sysctl.d/kubernetes.conf<<EOF
     # net.bridge.bridge-nf-call-ip6tables = 1
     # net.bridge.bridge-nf-call-iptables = 1
     # net.ipv4.ip_forward = 1
     # EOF
-    
-
+    #
     # sudo tee /etc/docker/daemon.json <<EOF
     # {
     #   "exec-opts": ["native.cgroupdriver=systemd"],
@@ -98,11 +118,14 @@ function common_install {
     #   "storage-driver": "overlay2"
     # }
     # EOF
-    
-    echo -e "overlay\nbr_netfilter" | sudo tee -a /etc/modules-load.d/k8s.conf
+    #
+    echo -e "\n"
+    echo -e "${YELLOW}# Adding k8sconf and daemon..${BOLD}"
     echo -e "net.bridge.bridge-nf-call-ip6tables = 1\nnet.bridge.bridge-nf-call-iptables = 1\nnet.ipv4.ip_forward = 1" | sudo tee /etc/sysctl.d/kubernetes.conf
     echo -e '{\n  "exec-opts": ["native.cgroupdriver=systemd"],\n  "log-driver": "json-file",\n  "log-opts": {\n    "max-size": "100m"\n  },\n  "storage-driver": "overlay2"\n}' | sudo tee /etc/docker/daemon.json
 
+    echo -e "\n"
+    echo -e "${YELLOW}# Reloading sysctl system..${BOLD}"
     sudo sysctl --system
 
     echo -e "\n"
@@ -115,6 +138,18 @@ function common_install {
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
     yes | sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
     
+    echo -e "\n"
+    echo -e "${YELLOW}# Enabling service kubelet...${BOLD}"
+    sudo systemctl enable kubelet
+
+    echo -e "\n"
+    echo -e "${GREEN}##### Kubernetes Success Installed #####${BOLD}"
+    
+    ###################
+
+    echo -e "\n"
+    echo -e "${BLUE}##### Installing CRI Docker #####${BOLD}"
+
     echo -e "\n"
     echo -e "${YELLOW}# Updating packages...${BOLD}"
     sudo apt update
@@ -138,7 +173,7 @@ function common_install {
     echo -e "${YELLOW}# Installing required packages...${BOLD}"
     sudo apt install git wget curl -y
     sudo apt install curl gnupg2 software-properties-common apt-transport-https ca-certificates -y
-    
+
     echo -e "\n"
     echo -e "${YELLOW}# Installing Golang...${BOLD}"
     wget https://storage.googleapis.com/golang/getgo/installer_linux
@@ -166,13 +201,12 @@ function common_install {
     sudo systemctl enable cri-docker.service
     sudo systemctl enable --now cri-docker.socket
 
+    echo -e "\n"
+    echo -e "${GREEN}##### CRI Docker Success Installed #####${BOLD}"
+
     echo -e "\n"  
     echo -e "${YELLOW}# Checking kernel modules...${BOLD}"
     lsmod | grep br_netfilter
-
-    echo -e "\n"
-    echo -e "${YELLOW}# Enabling service kubelet...${BOLD}"
-    sudo systemctl enable kubelet
 
     echo -e "\n"
     echo -e "${YELLOW}# Disabling service ufw...${BOLD}"
@@ -184,9 +218,11 @@ function master_node {
     common_install
 
     echo -e "\n"
-    echo -e "${PURPLE}##### Only on master node #####${BOLD}"
+    echo -e "${BLUE}##### Run Only On Master Node #####${BOLD}"
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Pulling default images...${BOLD}"
     sudo kubeadm config images pull --cri-socket unix:///run/cri-dockerd.sock
-    read -p "Enter the internal IP address of the master node: " internalip
 
     echo -e "\n"
     echo -e "${YELLOW}# Run kubeadm init command...${BOLD}"
@@ -195,53 +231,82 @@ function master_node {
     #  --cri-socket unix:///run/cri-dockerd.sock  \
     #  --upload-certs \
     #  --control-plane-endpoint=$internalip
+    #!/bin/bash
+    while [[ -z $internalip ]]; do
+      read -p "Enter the internal IP address of the master node (e.g. 10.184.0.8): " internalip
+    done
     read -p "Enter the pod network CIDR (e.g. 10.244.0.0/16): " podip
     if [ -z "$podip" ]; then
       podip="10.244.0.0/16"
     fi
+    echo -e "\n"
+    echo -e "${YELLOW}# Run kubeadm init command...${BOLD}"
     sudo kubeadm init \
       --pod-network-cidr="$podip" \
       --cri-socket unix:///run/cri-dockerd.sock \
       --upload-certs \
       --control-plane-endpoint="$internalip"
 
-
     echo -e "\n"
     echo -e "${YELLOW}# Setting kube config...${BOLD}"
     mkdir -p $HOME/.kube
     sudo cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
     sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Setting networking using CNI Flannel...${BOLD}"
+    kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+
+    echo -e "\n"
+    echo -e "${YELLOW}# Getting cluster-info and nodes...${BOLD}"
     kubectl cluster-info
     kubectl get nodes
 
     echo -e "\n"
-    echo -e "${YELLOW}# Setting CNI using Flannel...${BOLD}"
-    kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+    echo -e "${YELLOW}# Print kubernetes token...${BOLD}"
+    kubeadm token create --print-join-command >> k8s-token.txt
 
     echo -e "\n"
-    echo -e "${YELLOW}# Print kubernetes token...${BOLD}"
-    kubeadm token create --print-join-command
+    echo -e "${GREEN}##### Successfull Print Token #####${BOLD}"
 }
 
 function cluster_node {
     common_install
 
     echo -e "\n"
-    echo -e "${PURPLE}##### Only on cluster node #####${BOLD}"
-    read -p "Enter the internal IP address of the cluster node: " internalip
-    read -p "Enter the token: " token
-    read -p "Enter the discovery-token-ca-cert-hash: " shatoken
-    
+    echo -e "${BLUE}##### Run Only On Cluster Node #####${BOLD}"
+    while true; do
+      read -p "Enter the internal IP address of the cluster node: " internalip
+      if [ -z "$internalip" ]; then
+          echo "Please enter a valid internal IP address."
+          continue
+      fi
+      read -p "Enter the token: " token
+      if [ -z "$token" ]; then
+          echo "Please enter a valid token."
+          continue
+      fi
+      read -p "Enter the discovery-token-ca-cert-hash: " shatoken
+      if [ -z "$shatoken" ]; then
+          echo "Please enter a valid discovery-token-ca-cert-hash."
+          continue
+      fi
+      break
+    done
+
     echo -e "\n"
     echo -e "${YELLOW}# Run kubeadm join command...${BOLD}"
     sudo kubeadm join $internalip:6443 --token $token \
         --discovery-token-ca-cert-hash sha256:$shatoken \
         --cri-socket unix:///run/cri-dockerd.sock
+    
+    echo -e "\n"
+    echo -e "${GREEN}##### Successfull Join Into Master Node #####${BOLD}"
 }
 
 function reset_node {
     echo -e "\n"
-    echo -e "${PURPLE}##### Only when wanna reset node #####${BOLD}"
+    echo -e "${BLUE}##### Only Run When Wanna Reset Node #####${BOLD}"
 
     echo -e "\n"
     echo -e "${YELLOW}# Run kubeadm reset command...${BOLD}"
