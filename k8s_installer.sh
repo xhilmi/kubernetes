@@ -12,7 +12,6 @@ BOLD='\033[1m'
 ITALIC='\033[3m'
 
 # Clearing prompt after running this script.
-clear
 echo -e "\n"
 echo -e "${PURPLE}##### Tools Install Kubernetes and CRI Docker #####${BOLD}"
 echo -e "\n"
@@ -35,8 +34,7 @@ function common_install {
     echo -e "${YELLOW}# Common steps for master node and cluster node${BOLD}"
     
     # ... All the common steps for master and cluster node
-    while true;
-        do
+    while true; do
         read -p "Enter the hostname of this node: " hostnamectl
         echo "Hostname: $hostnamectl"
         read -p "Is this correct? (y/n) " yn
@@ -219,6 +217,7 @@ function master_node {
 
 function cluster_node {
     common_install
+    
     echo -e "\n"
     echo -e "${PURPLE}##### Only on cluster node #####${BOLD}"
     read -p "Enter the internal IP address of the cluster node: " internalip
