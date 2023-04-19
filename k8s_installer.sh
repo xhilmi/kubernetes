@@ -96,29 +96,7 @@ function common_install {
     sudo modprobe overlay
     sudo modprobe br_netfilter
     echo -e "overlay\nbr_netfilter" | sudo tee -a /etc/modules-load.d/k8s.conf
-    #
-    # sudo tee /etc/modules-load.d/k8s.conf<<EOF
-    # overlay
-    # br_netfilter
-    # EOF
-    #
-    # sudo tee /etc/sysctl.d/kubernetes.conf<<EOF
-    # net.bridge.bridge-nf-call-ip6tables = 1
-    # net.bridge.bridge-nf-call-iptables = 1
-    # net.ipv4.ip_forward = 1
-    # EOF
-    #
-    # sudo tee /etc/docker/daemon.json <<EOF
-    # {
-    #   "exec-opts": ["native.cgroupdriver=systemd"],
-    #   "log-driver": "json-file",
-    #   "log-opts": {
-    #     "max-size": "100m"
-    #   },
-    #   "storage-driver": "overlay2"
-    # }
-    # EOF
-    #
+
     echo -e "\n"
     echo -e "${YELLOW}# Adding k8sconf and daemon..${BOLD}"
     echo -e "net.bridge.bridge-nf-call-ip6tables = 1\nnet.bridge.bridge-nf-call-iptables = 1\nnet.ipv4.ip_forward = 1" | sudo tee /etc/sysctl.d/kubernetes.conf
@@ -216,6 +194,7 @@ function common_install {
 
 # function (1)
 function master_install {
+    # call function common_install
     common_install
 
     echo -e "\n"
@@ -269,6 +248,7 @@ function master_install {
 
 # function (2)
 function cluster_install {
+    # call function common_install
     common_install
 
     echo -e "\n"
@@ -304,7 +284,6 @@ function cluster_install {
 
 # function (3)
 function kubeadm_init {
-
     echo -e "\n"
     echo -e "${BLUE}##### Run Only On Master Node #####${BOLD}"
 
@@ -396,8 +375,6 @@ function kubeadm_reset {
     echo -e "${YELLOW}# Run kubeadm reset command...${BOLD}"
     sudo kubeadm reset --cri-socket=unix:///var/run/cri-dockerd.sock && sudo rm -rf /etc/cni/net.d && sudo rm -f $HOME/.kube/config
 }
-
-
 
 while true; do
     menu
