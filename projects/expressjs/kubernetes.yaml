@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expressjs
+  labels:
+    app: expressjs
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: expressjs
+  template:
+    metadata:
+      labels:
+        app: expressjs
+    spec:
+      tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+        - name: expressjs
+          image: hilmiafifi/expressjs:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: NODE_ENV
+              value: "production"
+#      imagePullSecrets:
+#        - name: hilmiafifi
+#      restartPolicy: Always
+#  namespace: expressjs-kubernetes-namespace
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: expressjs
+  labels:
+    app: expressjs
+spec:
+  selector:
+    app: expressjs
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer
