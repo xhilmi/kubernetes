@@ -50,12 +50,11 @@ echo -e "${GREEN}
 #######################################################################
 ${BOLD}"
 sudo apt update
-sudo apt install curl apt-transport-https -y
+sudo apt install -y vim git wget curl gnupg2 software-properties-common apt-transport-https ca-certificates
 curl -fsSL  https://packages.cloud.google.com/apt/doc/apt-key.gpg|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/k8s.gpg
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-sudo apt update
-sudo apt install wget curl vim git kubelet kubeadm kubectl -y
+sudo apt -y install kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 kubectl version --client && kubeadm version
 sudo swapoff -a 
@@ -90,10 +89,8 @@ echo -e "${GREEN}
 #######################################################################
 ${BOLD}"
 sudo apt update
-sudo apt install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 yes | sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-sudo apt update
 sudo apt install -y containerd.io docker-ce docker-ce-cli
 sudo mkdir -p /etc/systemd/system/docker.service.d
 sudo systemctl daemon-reload 
@@ -107,10 +104,6 @@ echo -e "${GREEN}
 #######################################################################
 ${BOLD}"
 sudo apt update
-sudo apt install git wget curl -y
-sudo apt install curl gnupg2 software-properties-common apt-transport-https
-sudo apt update
-sudo apt install git wget curl gnupg2 software-properties-common apt-transport-https ca-certificates -y
 wget https://storage.googleapis.com/golang/getgo/installer_linux
 chmod +x ./installer_linux
 ./installer_linux
