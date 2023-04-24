@@ -15,3 +15,4 @@
 # crictl --runtime-endpoint unix:///var/run/cri-dockerd.sock logs CONTAINERID
 # systemctl status kubelet
 # journalctl -xeu kubelet
+
