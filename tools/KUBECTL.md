@@ -67,15 +67,15 @@
 - kubectl get service -A
 - kubectl get job
 - kubectl get cronjob
-- - kubectl get -f file.yaml -o yaml
+- kubectl get -f file.yaml -o yaml
 - kubectl get pv
 - kubectl get pvc
 
-kubectl label node master-node node=master-node
-kubectl label node master-node node-role.kubernetes.io/control-plane=control-plane
-kubectl label node master-node node-role.kubernetes.io/control-plane-
-kubectl taint node master-node node-role.kubernetes.io/control-plane:NoSchedule
-kubectl taint node master-node node-role.kubernetes.io/control-plane:NoSchedule-
+- kubectl label node master-node node=master-node
+- kubectl label node master-node node-role.kubernetes.io/control-plane=control-plane
+- kubectl label node master-node node-role.kubernetes.io/control-plane-
+- kubectl taint node master-node node-role.kubernetes.io/control-plane:NoSchedule
+- kubectl taint node master-node node-role.kubernetes.io/control-plane:NoSchedule-
 
 - kubectl label node cluster-node-a node-role.kubernetes.io/worker-a=worker-a
 - kubectl label node cluster-node-a node-role.kubernetes.io/worker-a-
@@ -84,8 +84,11 @@ kubectl taint node master-node node-role.kubernetes.io/control-plane:NoSchedule-
 
 - kubectl label node cluster-node-b node-role.kubernetes.io/worker-b=worker-b
 - kubectl label node cluster-node-b node-role.kubernetes.io/worker-b-
-- - kubectl taint node cluster-node-b node-role.kubernetes.io/worker-b:NoSchedule
+- kubectl taint node cluster-node-b node-role.kubernetes.io/worker-b:NoSchedule
 - kubectl taint node cluster-node-b node-role.kubernetes.io/worker-b:NoSchedule-
+
+- kubectl taint nodes --all node-role.kubernetes.io/master-
+- kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
 - kubectl logs <scheduler-pod>
 - kubectl logs <pod-name> -c <container-name>
