@@ -48,7 +48,7 @@ kubectl get service -n kubernetes-dashboard
 read -p "Do you want to create an admin user for accessing the Kubernetes Dashboard? (Y/N) " create_admin
 
 if [[ "$create_admin" == [Yy] ]]; then
-  sudo tee admin-sa.yml <<EOF
+  sudo tee admin-sa.yaml <<EOF
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -56,8 +56,8 @@ metadata:
   name: k8sadmin
   namespace: kube-system
 EOF
-  kubectl apply -f admin-sa.yml
-  sudo tee admin-rbac.yml <<EOF
+  kubectl apply -f admin-sa.yaml
+  sudo tee admin-rbac.yaml <<EOF
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -73,7 +73,7 @@ subjects:
     name: k8sadmin
     namespace: kube-system
 EOF
-  kubectl apply -f admin-rbac.yml
+  kubectl apply -f admin-rbac.yaml
   sudo tee k8sadmin-secret.yaml <<EOF
 apiVersion: v1
 kind: Secret
