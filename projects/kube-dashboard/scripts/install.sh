@@ -12,10 +12,6 @@ wget https://raw.githubusercontent.com/kubernetes/dashboard/$VER/aio/deploy/reco
 kubectl apply -f kubernetes-dashboard.yaml
 kubectl get svc -n kubernetes-dashboard
 
-# Patch Expose LoadBalancer
-kubectl -n kubernetes-dashboard patch svc kubernetes-dashboard -p '{"spec": {"type": "LoadBalancer"}}'
-kubectl -n kubernetes-dashboard get services
-
 # Patch Expose NodePort
 kubectl --namespace kubernetes-dashboard patch svc kubernetes-dashboard -p '{"spec": {"type": "NodePort"}}'
 kubectl -n kubernetes-dashboard get services
@@ -32,6 +28,10 @@ kubectl -n kubernetes-dashboard patch svc kubernetes-dashboard --patch "$(cat no
 kubectl get deployments -n kubernetes-dashboard
 kubectl get pods -n kubernetes-dashboard
 kubectl get service -n kubernetes-dashboard  
+
+# Patch Expose LoadBalancer
+kubectl -n kubernetes-dashboard patch svc kubernetes-dashboard -p '{"spec": {"type": "LoadBalancer"}}'
+kubectl -n kubernetes-dashboard get services
 
 # Create Admin Kubernetes Dashboard
 # https://computingforgeeks.com/create-admin-user-to-access-kubernetes-dashboard/
