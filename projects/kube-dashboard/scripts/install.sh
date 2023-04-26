@@ -2,8 +2,8 @@
 # https://computingforgeeks.com/how-to-install-kubernetes-dashboard-with-nodeport/
 
 # Ubuntu / Debian
-mkdir kube-dashboard
-cd kube-dashboard
+mkdir repository && cd repository
+mkdir kube-dashboard && cd kube-dashboard
 sudo apt update
 sudo apt install wget curl
 VER=$(curl -s https://api.github.com/repos/kubernetes/dashboard/releases/latest|grep tag_name|cut -d '"' -f 4)
