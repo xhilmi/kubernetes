@@ -31,7 +31,7 @@ kubectl -n monitoring get svc | grep "NodePort\|LoadBalancer"
 sudo tee alertmanager_main_patch.yaml <<EOF
 spec:
   ports:
-  - nodePort: 32002
+  - nodePort: 32001
     port: 9093
     protocol: TCP
     targetPort: 8443
@@ -39,7 +39,7 @@ EOF
 sudo tee grafana_patch.yaml <<EOF
 spec:
   ports:
-  - nodePort: 32003
+  - nodePort: 32002
     port: 3000
     protocol: TCP
     targetPort: 8443
@@ -47,10 +47,10 @@ EOF
 sudo tee prometheus_k8s_patch.yaml <<EOF
 spec:
   ports:
-  - nodePort: 32001
-    port: 443
+  - nodePort: 32003
+    port: 9090
     protocol: TCP
-    targetPort: 9090
+    targetPort: 8443
 EOF
 kubectl -n monitoring patch svc alertmanager-main --p "$(cat alertmanager_main_patch.yaml)"
 kubectl -n monitoring patch svc grafana --p "$(cat grafana_patch.yaml)"
