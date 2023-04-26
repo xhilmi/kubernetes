@@ -121,10 +121,12 @@ case "$choice" in
     ;;
   [Ee]) # Exit
     echo "Exiting."
+    sleep 10
     exit 0
     ;;
   *) # Invalid input
     echo "Invalid input. Exiting."
+    sleep 10
     exit 1
     ;;
 esac

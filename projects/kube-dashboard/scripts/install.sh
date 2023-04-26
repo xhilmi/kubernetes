@@ -61,11 +61,6 @@ subjects:
     namespace: kube-system
 EOF
 kubectl apply -f admin-rbac.yml
-kubectl create token k8sadmin -n kube-system
-
-# sample output
-# copy secret token
-
 sudo tee k8sadmin-secret.yaml <<EOF
 apiVersion: v1
 kind: Secret
@@ -79,3 +74,5 @@ kubectl apply -f k8sadmin-secret.yaml
 export NAMESPACE="kube-system"
 export K8S_USER="k8sadmin"
 kubectl get services -A | grep dashboard
+kubectl create token k8sadmin -n kube-system > k8sadmin.token
+cat k8sadmin.token
