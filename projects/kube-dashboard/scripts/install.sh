@@ -14,8 +14,8 @@ kubectl apply -f kubernetes-dashboard.yaml
 kubectl get svc -n kubernetes-dashboard
 
 # Patch Expose NodePort
-kubectl --namespace kubernetes-dashboard patch svc kubernetes-dashboard -p '{"spec": {"type": "NodePort"}}'
-kubectl -n kubernetes-dashboard get services
+kubectl -n kubernetes-dashboard patch svc kubernetes-dashboard -p '{"spec": {"type": "NodePort"}}'
+kubectl -n kubernetes-dashboard get svc
 kubectl get svc -n kubernetes-dashboard kubernetes-dashboard -o yaml
 sudo tee nodeport_dashboard_patch.yaml <<EOF
 spec:
@@ -26,13 +26,13 @@ spec:
     targetPort: 8443
 EOF
 kubectl -n kubernetes-dashboard patch svc kubernetes-dashboard --patch "$(cat nodeport_dashboard_patch.yaml)"
-kubectl get deployments -n kubernetes-dashboard
+kubectl get deploy -n kubernetes-dashboard
 kubectl get pods -n kubernetes-dashboard
-kubectl get service -n kubernetes-dashboard  
+kubectl get svc -n kubernetes-dashboard  
 
 # Patch Expose LoadBalancer
 kubectl -n kubernetes-dashboard patch svc kubernetes-dashboard -p '{"spec": {"type": "LoadBalancer"}}'
-kubectl -n kubernetes-dashboard get services
+kubectl -n kubernetes-dashboard get svc
 
 # Create Admin Kubernetes Dashboard
 # https://computingforgeeks.com/create-admin-user-to-access-kubernetes-dashboard/
@@ -74,6 +74,6 @@ EOF
 kubectl apply -f k8sadmin-secret.yaml
 export NAMESPACE="kube-system"
 export K8S_USER="k8sadmin"
-kubectl get services -A | grep dashboard
+kubectl get svc -A | grep dashboard
 kubectl create token k8sadmin -n kube-system > k8sadmin.token
 cat k8sadmin.token
