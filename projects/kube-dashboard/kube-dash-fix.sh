@@ -1,14 +1,10 @@
 #!/bin/bash
 
-# Prompt the user for their choice
-read -p "Do you want to (I)nstall, (D)elete, or (E)xit the Kubernetes Dashboard? " choice
-
-# Depending on the user's choice, either install, delete or exit
-if [[ "$choice" == [Ii] ]]; then
-
+# Function to install Kubernetes Dashboard
+function install_dashboard() {
   # Install the Kubernetes Dashboard
   # https://computingforgeeks.com/how-to-install-kubernetes-dashboard-with-nodeport/
-  
+
   # Ubuntu / Debian
   mkdir kube-dashboard
   cd kube-dashboard
@@ -19,7 +15,7 @@ if [[ "$choice" == [Ii] ]]; then
   wget https://raw.githubusercontent.com/kubernetes/dashboard/$VER/aio/deploy/recommended.yaml -O kubernetes-dashboard.yaml
   kubectl apply -f kubernetes-dashboard.yaml
   kubectl get svc -n kubernetes-dashboard
-  
+
   # Prompt the user for their choice of how to expose the Kubernetes Dashboard service
   read -p "How do you want to expose the Kubernetes Dashboard service? Choose (L)oadBalancer or (N)odePort: " choice
 
@@ -27,6 +23,8 @@ if [[ "$choice" == [Ii] ]]; then
   if [[ "$choice" == [Ll] ]]; then
     kubectl -n kubernetes-dashboard patch svc kubernetes-dashboard -p '{"spec": {"type": "LoadBalancer"}}'
     kubectl -n kubernetes-dashboard get services
+    # Function add_user
+    add_user
 
   # NodePort
   elif [[ "$choice" == [Nn] ]]; then
@@ -40,6 +38,8 @@ if [[ "$choice" == [Ii] ]]; then
     echo "    protocol: TCP" >> nodeport_dashboard_patch.yaml
     echo "    targetPort: 8443" >> nodeport_dashboard_patch.yaml
     kubectl -n kubernetes-dashboard patch svc kubernetes-dashboard --patch "$(cat nodeport_dashboard_patch.yaml)"
+    # Function add_user
+    add_user
   else
     echo "Invalid input. Exiting."
     exit 1
@@ -49,27 +49,82 @@ if [[ "$choice" == [Ii] ]]; then
   kubectl get deployments -n kubernetes-dashboard
   kubectl get pods -n kubernetes-dashboard
   kubectl get service -n kubernetes-dashboard
+}
 
-elif [[ "$choice" == [Dd] ]]; then
-  # Delete the Kubernetes Dashboard
-  kubectl delete -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yaml
-  kubectl delete -f admin-user.yaml
-  kubectl delete -f kubernetes-dashboard.yaml
-  kubectl delete -f recommended.yaml
-  kubectl delete -f nodeport_dashboard_patch.yaml
-  kubectl delete -f admin-sa.yaml
-  kubectl delete -f admin-rbac.yaml
-  kubectl delete -f k8sadmin-secret.yaml
+# Function add_user
+function add_user() {
+# Create Admin Kubernetes Dashboard
+# https://computingforgeeks.com/create-admin-user-to-access-kubernetes-dashboard/
+sudo tee admin-sa.yml <<EOF
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: k8sadmin
+  namespace: kube-system
+EOF
+kubectl apply -f admin-sa.yml
+sudo tee admin-rbac.yml <<EOF
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  namespace: kube-system
+  name: k8sadmin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: k8sadmin
+    namespace: kube-system
+EOF
+kubectl apply -f admin-rbac.yml
+sudo tee k8sadmin-secret.yaml <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: k8sadmin-token
+  annotations:
+    kubernetes.io/service-account.name: k8sadmin
+type: kubernetes.io/service-account-token
+EOF
+kubectl apply -f k8sadmin-secret.yaml
+export NAMESPACE="kube-system"
+export K8S_USER="k8sadmin"
+kubectl get services -A | grep dashboard
+kubectl create token k8sadmin -n kube-system > k8sadmin.token
+cat k8sadmin.token
+}
 
 
-elif [[ "$choice" == [Ee] ]]; then
-  # Exit
-  echo "Exiting."
-  exit 0
+function uninstall_dashboard() {
+# Delete the Kubernetes Dashboard
+    kubectl delete -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yaml
+    kubectl delete -f admin-user.yaml
+    kubectl delete -f kubernetes-dashboard.yaml
+    kubectl delete -f recommended.yaml
+    kubectl delete -f nodeport_dashboard_patch.yaml
+    kubectl delete -f admin-sa.yaml
+    kubectl delete -f admin-rbac.yaml
+    kubectl delete -f k8sadmin-secret.yaml
+}
 
-else
-  # Invalid input
-  echo "Invalid input. Exiting."
-  exit 1
-
-fi
+# Case statement to handle user choice
+case "$choice" in
+  [Ii]) # Install Kubernetes Dashboard
+    install_dashboard
+    ;;
+  [Dd]) # Delete Kubernetes Dashboard
+    uninstall_dashboard
+    ;;
+  [Ee]) # Exit
+    echo "Exiting."
+    exit 0
+    ;;
+  *) # Invalid input
+    echo "Invalid input. Exiting."
+    exit 1
+    ;;
+esac
