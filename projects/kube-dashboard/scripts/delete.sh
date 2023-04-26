@@ -2,6 +2,8 @@
 # https://computingforgeeks.com/how-to-install-kubernetes-dashboard-with-nodeport/
 cd ~/repository
 kubectl delete --ignore-not-found=true -f kube-dashboard/
+cd ..
+rm -rf kube-dashboard/
 
 # cd ~/repository/kube-dashboard
 # kubectl delete -f kubernetes-dashboard.yaml
