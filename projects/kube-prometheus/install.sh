@@ -27,34 +27,43 @@ kubectl -n monitoring patch svc grafana -p '{"spec": {"type": "NodePort"}}'
 kubectl -n monitoring patch svc prometheus-k8s -p '{"spec": {"type": "NodePort"}}'
 kubectl -n monitoring get svc | grep "NodePort\|LoadBalancer"
 
+# Prometheus Alertmanager Grafana Backup 
+kubectl -n monitoring get svc alertmanager-main -o yaml > alertmanager-main.yaml-BAK
+kubectl -n monitoring get svc grafana -o yaml > grafana.yaml-BAK
+kubectl -n monitoring get svc prometheus-k8s -o yaml > prometheus-k8s.yaml-BAK
+
 # Prometheus Alertmanager Grafana = NodePort Patch
 sudo tee alertmanager_main_patch.yaml <<EOF
 spec:
   ports:
-  - nodePort: 32001
+  - name: web
+    nodePort: 30001
     port: 9093
     protocol: TCP
-    targetPort: 8443
+    targetPort: web
 EOF
 sudo tee grafana_patch.yaml <<EOF
 spec:
   ports:
-  - nodePort: 32002
+  - name: http
+    nodePort: 30002
     port: 3000
     protocol: TCP
-    targetPort: 8443
+    targetPort: http
 EOF
 sudo tee prometheus_k8s_patch.yaml <<EOF
 spec:
   ports:
-  - nodePort: 32003
+  - name: web
+    nodePort: 30003
     port: 9090
     protocol: TCP
-    targetPort: 8443
+    targetPort: web
 EOF
-kubectl -n monitoring patch svc alertmanager-main --p "$(cat alertmanager_main_patch.yaml)"
-kubectl -n monitoring patch svc grafana --p "$(cat grafana_patch.yaml)"
-kubectl -n monitoring patch svc prometheus-k8s --p "$(cat prometheus_k8s_patch.yaml)"
+
+kubectl -n monitoring patch svc alertmanager-main -p "$(cat alertmanager_main_patch.yaml)"
+kubectl -n monitoring patch svc grafana -p "$(cat grafana_patch.yaml)"
+kubectl -n monitoring patch svc prometheus-k8s -p "$(cat prometheus_k8s_patch.yaml)"
 kubectl -n monitoring get svc | grep "NodePort\|LoadBalancer"
 
 # Prometheus Alertmanager Grafana = LoadBalancer

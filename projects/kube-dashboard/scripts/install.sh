@@ -20,7 +20,7 @@ kubectl get svc -n kubernetes-dashboard kubernetes-dashboard -o yaml
 sudo tee nodeport_dashboard_patch.yaml <<EOF
 spec:
   ports:
-  - nodePort: 32000
+  - nodePort: 30000
     port: 443
     protocol: TCP
     targetPort: 8443
