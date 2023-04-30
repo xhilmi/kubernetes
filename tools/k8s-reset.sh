@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 # (c) 2023 Hilmi
 
 # Color
