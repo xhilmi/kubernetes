@@ -1,3 +1,6 @@
+### REFERENCE
+- https://www.cherryservers.com/blog/install-kubernetes-on-ubuntu
+
 ### ADDITIONAL COMMAND ###
 - bash <(curl -s https://raw.githubusercontent.com/xhilmi/kubernetes/master/tools/k8s-2024-master-plane.sh)
 
