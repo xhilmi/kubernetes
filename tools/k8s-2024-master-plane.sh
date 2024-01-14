@@ -155,6 +155,7 @@ Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"
 EOF
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
+sudo kubeadm reset --force
 sudo kubeadm init --control-plane-endpoint=master-plane --upload-certs
 
 
