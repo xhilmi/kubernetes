@@ -5,8 +5,8 @@ sudo hostnamectl set-hostname "master-node"
 exec bash
 
 sudo tee /etc/hosts <<EOF
-10.128.0.3 master-plane
-10.128.0.4 worker-node-02
+10.128.0.3 master-node
+10.128.0.4 worker-node
 EOF
 
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
