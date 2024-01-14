@@ -46,3 +46,5 @@ sudo systemctl restart containerd.service
 sudo systemctl restart kubelet.service
 sudo systemctl enable kubelet.service
 
+kubeadm join 10.128.0.3:6443 --token 4x32uy.t5r2y2b5vhx07vsi \
+        --discovery-token-ca-cert-hash sha256:db238bd62321441817b7a88d860f3194807b78538c854b364225fdca270fa262
