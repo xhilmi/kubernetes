@@ -156,7 +156,8 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
 sudo kubeadm reset --force
-sudo kubeadm init --control-plane-endpoint=master-plane --upload-certs
+sudo systemctl start kubelet
+sudo kubeadm init --control-plane-endpoint=master-plane --upload-certs --ignore-preflight-errors=All
 
 
 echo -e "\n"
