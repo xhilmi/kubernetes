@@ -1,4 +1,6 @@
 ### ADDITIONAL COMMAND ###
+- bash <(curl -s https://raw.githubusercontent.com/xhilmi/kubernetes/master/tools/k8s-2024-master-plane.sh)
+
 ### RUN IF YOU WANT TO REBUILD KUBEADM - AUTOMATICALLY ###
 - sudo kubeadm reset --cri-socket=unix:///var/run/cri-dockerd.sock
 
